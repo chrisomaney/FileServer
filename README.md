@@ -65,36 +65,30 @@ sudo fileserver-create-user
 
 Then point a reverse proxy at the app (`deploy/nginx.conf`, or Apache on this host), issue a Let’s Encrypt cert, and put camera recordings under `/var/lib/cctv-footage` (or change `FOOTAGE_ROOT`).
 
-### Camera uploads (FTP + Samba `cloud`)
+## Camera uploads (FTP + Samba)
 
-Cameras do not upload into the web UI. They write into `/var/lib/cctv-footage` via **FTP** (`cam1`…`cam5`) and/or the Samba share named **`cloud`**.
-
-See `deploy/uploads.md`. On a configured host, credentials are in:
+Cameras write into `/var/lib/cctv-footage` (not into the web UI) via **FTP** (`cam1`…`cam5`) and optionally the Samba share **`cloud`**.
 
 ```bash
-sudo cat /root/fileserver-upload-credentials.txt
+sudo ./deploy/setup-cctv-ftp.sh   # vsftpd + cam1..cam5 chroots
 ```
 
-## CCTV FTP uploads (cameras → folders)
-
-IP cameras that upload over FTP can write into per-camera folders under `FOOTAGE_ROOT`. On the Debian host:
+See `deploy/FTP.md` and `deploy/uploads.md`. Credentials on a configured host:
 
 ```bash
-sudo ./deploy/setup-cctv-ftp.sh
+sudo cat /root/fileserver-ftp-credentials.txt
 ```
-
-That installs **vsftpd**, creates local users `cam1`…`cam5` chrooted to `/var/lib/cctv-footage/camN`, opens UFW for `21/tcp` and passive `40000-40100/tcp`, and writes credentials to **`/root/fileserver-ftp-credentials.txt`** (mode `600`, root only).
 
 | Camera setting | Value |
 |---|---|
 | Host | server hostname or IP (e.g. `m4484.contaboserver.net`) |
 | Port | `21` |
 | Username | `cam1` … `cam5` |
-| Password | from `/root/fileserver-ftp-credentials.txt` on the server |
-| Remote path | `/` or blank (user is already chrooted to their folder) |
-| Mode | Passive FTP |
+| Password | from the credentials file (root only) |
+| Remote path | `/` or blank (user is chrooted to `/var/lib/cctv-footage/camN`) |
+| Mode | Passive FTP (`40000–40100`) |
 
-**Security:** many cameras only speak plain FTP (passwords and footage in cleartext). Users are chrooted and UFW-limited to the FTP ports, but prefer LAN/VPN or FTPS when the cameras support it. Do not paste credentials into chat, tickets, or git.
+**Security:** many cameras only speak plain FTP (passwords and footage in cleartext). Prefer LAN/VPN or FTPS when possible; do not paste credentials into chat, tickets, or git.
 
 ## Config
 
