@@ -48,7 +48,13 @@ HOST=127.0.0.1
 PORT=8080
 TRUST_PROXY_HEADERS=true
 EOF
-  chmod 600 "$ENV_FILE"
+  chmod 640 "$ENV_FILE"
+  chown root:fileserver "$ENV_FILE"
+fi
+# Keep env readable by the service account (create-user runs as fileserver).
+if [[ -f "$ENV_FILE" ]]; then
+  chown root:fileserver "$ENV_FILE"
+  chmod 640 "$ENV_FILE"
 fi
 
 chown -R fileserver:fileserver "$APP_DIR" "$DATA_DIR"

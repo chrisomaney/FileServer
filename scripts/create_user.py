@@ -16,9 +16,18 @@ if str(ROOT) not in sys.path:
 
 def _load_env_file(path: Path) -> None:
     """Load KEY=VALUE lines into the process env if not already set."""
-    if not path.is_file():
+    try:
+        raw_text = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
         return
-    for raw in path.read_text(encoding="utf-8").splitlines():
+    except PermissionError:
+        # /etc/fileserver.env is often root:600; the wrapper should export vars.
+        return
+    except OSError as exc:
+        print(f"Warning: could not read {path}: {exc}", file=sys.stderr)
+        return
+
+    for raw in raw_text.splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
@@ -58,6 +67,14 @@ def main() -> int:
             return 1
 
     settings = get_settings()
+    if not os.access(settings.data_dir, os.W_OK):
+        print(
+            f"Error: cannot write to {settings.data_dir}. "
+            "Run: sudo fileserver-create-user",
+            file=sys.stderr,
+        )
+        return 1
+
     store = UserStore(settings.users_file)
     try:
         store.create(username, password)

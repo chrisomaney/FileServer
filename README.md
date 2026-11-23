@@ -54,10 +54,13 @@ sudo ./deploy/install.sh
 sudo fileserver-create-user
 ```
 
-`fileserver-create-user` is installed by `deploy/install.sh`. If you already installed an older copy, pull/update and re-run `sudo ./deploy/install.sh`, or create a user with:
+`fileserver-create-user` is installed by `deploy/install.sh`. If you already installed an older copy:
 
 ```bash
-sudo /opt/FileServer/.venv/bin/python /opt/FileServer/scripts/create_user.py
+cd ~/FileServer   # or your clone path
+git pull
+sudo ./deploy/install.sh
+sudo fileserver-create-user
 ```
 
 Then point nginx at the app (`deploy/nginx.conf`), issue a Let’s Encrypt cert, and put camera recordings under `/var/lib/cctv-footage` (or change `FOOTAGE_ROOT`).
