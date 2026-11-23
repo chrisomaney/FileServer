@@ -63,7 +63,38 @@ sudo ./deploy/install.sh
 sudo fileserver-create-user
 ```
 
-Then point nginx at the app (`deploy/nginx.conf`), issue a Let’s Encrypt cert, and put camera recordings under `/var/lib/cctv-footage` (or change `FOOTAGE_ROOT`).
+Then point a reverse proxy at the app (`deploy/nginx.conf`, or Apache on this host), issue a Let’s Encrypt cert, and put camera recordings under `/var/lib/cctv-footage` (or change `FOOTAGE_ROOT`).
+
+### Camera uploads (FTP + Samba `cloud`)
+
+Cameras do not upload into the web UI. They write into `/var/lib/cctv-footage` via **FTP** (`cam1`…`cam5`) and/or the Samba share named **`cloud`**.
+
+See `deploy/uploads.md`. On a configured host, credentials are in:
+
+```bash
+sudo cat /root/fileserver-upload-credentials.txt
+```
+
+## CCTV FTP uploads (cameras → folders)
+
+IP cameras that upload over FTP can write into per-camera folders under `FOOTAGE_ROOT`. On the Debian host:
+
+```bash
+sudo ./deploy/setup-cctv-ftp.sh
+```
+
+That installs **vsftpd**, creates local users `cam1`…`cam5` chrooted to `/var/lib/cctv-footage/camN`, opens UFW for `21/tcp` and passive `40000-40100/tcp`, and writes credentials to **`/root/fileserver-ftp-credentials.txt`** (mode `600`, root only).
+
+| Camera setting | Value |
+|---|---|
+| Host | server hostname or IP (e.g. `m4484.contaboserver.net`) |
+| Port | `21` |
+| Username | `cam1` … `cam5` |
+| Password | from `/root/fileserver-ftp-credentials.txt` on the server |
+| Remote path | `/` or blank (user is already chrooted to their folder) |
+| Mode | Passive FTP |
+
+**Security:** many cameras only speak plain FTP (passwords and footage in cleartext). Users are chrooted and UFW-limited to the FTP ports, but prefer LAN/VPN or FTPS when the cameras support it. Do not paste credentials into chat, tickets, or git.
 
 ## Config
 
@@ -83,6 +114,7 @@ See `.env.example`. Important keys:
 - Prefer strong unique passwords (12+ characters enforced).
 - Do not expose the app directly on the public internet without TLS + firewall.
 - Footage directory should be readable by the `fileserver` user; write access is not required for browsing.
+- Camera FTP (if enabled) uses chrooted `camN` accounts; keep passwords only in `/root/fileserver-ftp-credentials.txt`.
 
 ## License
 
