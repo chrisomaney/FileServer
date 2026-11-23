@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Wrapper installed to /usr/local/bin/fileserver-create-user
+set -euo pipefail
+
+APP_DIR="${FILESERVER_APP_DIR:-/opt/FileServer}"
+ENV_FILE="${FILESERVER_ENV_FILE:-/etc/fileserver.env}"
+PY="${APP_DIR}/.venv/bin/python"
+SCRIPT="${APP_DIR}/scripts/create_user.py"
+
+if [[ ! -x "$PY" ]]; then
+  echo "FileServer Python not found at $PY — run deploy/install.sh first." >&2
+  exit 1
+fi
+if [[ ! -f "$SCRIPT" ]]; then
+  echo "Create-user script missing at $SCRIPT — re-run deploy/install.sh." >&2
+  exit 1
+fi
+
+cd "$APP_DIR"
+if [[ -f "$ENV_FILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+fi
+
+if [[ "$(id -u)" -eq 0 ]]; then
+  exec sudo -u fileserver -- "$PY" "$SCRIPT" "$@"
+fi
+exec "$PY" "$SCRIPT" "$@"

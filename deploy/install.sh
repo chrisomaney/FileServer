@@ -57,14 +57,15 @@ chown root:fileserver "$FOOTAGE_DIR"
 chmod 750 "$FOOTAGE_DIR"
 
 install -m 644 "$APP_DIR/deploy/fileserver.service" /etc/systemd/system/fileserver.service
+install -m 755 "$APP_DIR/deploy/fileserver-create-user" /usr/local/bin/fileserver-create-user
 systemctl daemon-reload
 systemctl enable --now fileserver.service
 
 echo
 echo "FileServer installed."
 echo "1. Put footage under ${FOOTAGE_DIR} (or edit FOOTAGE_ROOT in ${ENV_FILE})"
-echo "2. Create a login:"
-echo "   sudo -u fileserver ${APP_DIR}/.venv/bin/python -m scripts.create_user"
+echo "2. Create a login (run as root or with sudo):"
+echo "   sudo fileserver-create-user"
 echo "3. Copy deploy/nginx.conf, set your domain, enable site, get a cert:"
 echo "   certbot --nginx -d footage.example.com"
 echo "4. Check: systemctl status fileserver && curl -s http://127.0.0.1:8080/healthz"

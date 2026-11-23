@@ -39,7 +39,7 @@ sudo apt-get install -y git
 git clone https://github.com/chrisomaney/FileServer.git
 cd FileServer
 sudo ./deploy/install.sh
-sudo -u fileserver /opt/FileServer/.venv/bin/python -m scripts.create_user
+sudo fileserver-create-user
 ```
 
 No git? Download a zip instead:
@@ -51,7 +51,13 @@ curl -L -o FileServer.zip https://github.com/chrisomaney/FileServer/archive/refs
 unzip FileServer.zip
 cd FileServer-main
 sudo ./deploy/install.sh
-sudo -u fileserver /opt/FileServer/.venv/bin/python -m scripts.create_user
+sudo fileserver-create-user
+```
+
+`fileserver-create-user` is installed by `deploy/install.sh`. If you already installed an older copy, pull/update and re-run `sudo ./deploy/install.sh`, or create a user with:
+
+```bash
+sudo /opt/FileServer/.venv/bin/python /opt/FileServer/scripts/create_user.py
 ```
 
 Then point nginx at the app (`deploy/nginx.conf`), issue a Let’s Encrypt cert, and put camera recordings under `/var/lib/cctv-footage` (or change `FOOTAGE_ROOT`).
