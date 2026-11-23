@@ -14,17 +14,24 @@ FOOTAGE_DIR=/var/lib/cctv-footage
 ENV_FILE=/etc/fileserver.env
 
 apt-get update
-apt-get install -y python3 python3-venv python3-pip nginx
+apt-get install -y python3 python3-venv python3-pip nginx rsync
 
 id fileserver &>/dev/null || useradd --system --home "$DATA_DIR" --shell /usr/sbin/nologin fileserver
 
 mkdir -p "$APP_DIR" "$DATA_DIR" "$FOOTAGE_DIR"
-rsync -a --delete \
-  --exclude '.git' \
-  --exclude '.venv' \
-  --exclude 'data' \
-  --exclude '__pycache__' \
-  "$REPO_ROOT"/ "$APP_DIR"/
+if command -v rsync >/dev/null 2>&1; then
+  rsync -a --delete \
+    --exclude '.git' \
+    --exclude '.venv' \
+    --exclude 'data' \
+    --exclude '__pycache__' \
+    "$REPO_ROOT"/ "$APP_DIR"/
+else
+  find "$APP_DIR" -mindepth 1 -maxdepth 1 ! -name '.venv' -exec rm -rf {} +
+  cp -a "$REPO_ROOT"/. "$APP_DIR"/
+  rm -rf "$APP_DIR/.git" "$APP_DIR/data"
+  find "$APP_DIR" -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
+fi
 
 python3 -m venv "$APP_DIR/.venv"
 "$APP_DIR/.venv/bin/pip" install --upgrade pip

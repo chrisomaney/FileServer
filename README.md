@@ -31,9 +31,25 @@ python -m scripts.create_user admin
 
 ## Debian 12 install
 
+`git` is not installed by default on a minimal Debian image. Install it first:
+
 ```bash
+sudo apt-get update
+sudo apt-get install -y git
 git clone https://github.com/chrisomaney/FileServer.git
 cd FileServer
+sudo ./deploy/install.sh
+sudo -u fileserver /opt/FileServer/.venv/bin/python -m scripts.create_user
+```
+
+No git? Download a zip instead:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y curl unzip
+curl -L -o FileServer.zip https://github.com/chrisomaney/FileServer/archive/refs/heads/main.zip
+unzip FileServer.zip
+cd FileServer-main
 sudo ./deploy/install.sh
 sudo -u fileserver /opt/FileServer/.venv/bin/python -m scripts.create_user
 ```
