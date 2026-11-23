@@ -13,11 +13,14 @@ On the Debian host, footage lands under `/var/lib/cctv-footage` and FileServer b
   cam5/
 ```
 
-Credentials (root only): `/root/fileserver-upload-credentials.txt`
+Credentials (root only, mode 600): `/root/fileserver-ftp-credentials.txt`
+(also mirrored at `/root/fileserver-upload-credentials.txt`).
 
 ```bash
-sudo cat /root/fileserver-upload-credentials.txt
+sudo cat /root/fileserver-ftp-credentials.txt
 ```
+
+Do not paste passwords into chat, tickets, or git. Re-run `deploy/setup-cctv-ftp.sh` to recreate FTP users/config (that script rotates FTP passwords).
 
 ## FTP (per camera)
 
