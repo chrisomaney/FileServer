@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ rel or 'Footage' }} · {{ app_name }}{% endblock %}
+{% block body %}
+<header class="topbar">
+  <div class="brand">
+    <strong>{{ app_name }}</strong>
+    <span class="muted">{{ user }}</span>
+  </div>
+  <form method="post" action="/logout">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button type="submit" class="ghost">Sign out</button>
+  </form>
+</header>
+
+<main class="page">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    {% for crumb in breadcrumbs %}
+      {% if not loop.last %}
+        <a href="{{ crumb.href }}">{{ crumb.label }}</a>
+        <span aria-hidden="true">/</span>
+      {% else %}
+        <span aria-current="page">{{ crumb.label }}</span>
+      {% endif %}
+    {% endfor %}
+  </nav>
+
+  <div class="toolbar">
+    <form method="get" class="search">
+      <label class="sr-only" for="q">Search this folder</label>
+      <input id="q" type="search" name="q" value="{{ query }}" placeholder="Filter by name…">
+      <button type="submit">Filter</button>
+    </form>
+    <p class="muted">{{ count }} item{% if count != 1 %}s{% endif %}</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Size</th>
+          <th>Modified</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if parent is not none %}
+        <tr>
+          <td colspan="4">
+            <a class="row-link" href="{% if parent %}{{ '/browse/' ~ parent }}{% else %}/{% endif %}">↑ Parent folder</a>
+          </td>
+        </tr>
+        {% endif %}
+        {% for entry in entries %}
+        <tr>
+          <td>
+            {% if entry.is_dir %}
+              <a class="row-link" href="/browse/{{ entry.rel_path }}">{{ entry.name }}/</a>
+            {% elif entry.kind in ['video', 'image'] %}
+              <a class="row-link" href="/view/{{ entry.rel_path }}">{{ entry.name }}</a>
+            {% else %}
+              <a class="row-link" href="/download/{{ entry.rel_path }}">{{ entry.name }}</a>
+            {% endif %}
+          </td>
+          <td class="muted">{{ entry.kind }}</td>
+          <td class="num">{{ entry.size_label }}</td>
+          <td class="muted">{{ entry.mtime_label }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="empty">No files here{% if query %} matching “{{ query }}”{% endif %}.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="footer-note muted">Serving from <code>{{ root_label }}</code> · v{{ app_version }}</p>
+</main>
+{% endblock %}

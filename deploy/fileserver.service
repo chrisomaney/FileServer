@@ -1,0 +1,28 @@
+[Unit]
+Description=FileServer CCTV footage browser
+After=network.target
+
+[Service]
+Type=simple
+User=fileserver
+Group=fileserver
+WorkingDirectory=/opt/FileServer
+EnvironmentFile=/etc/fileserver.env
+ExecStart=/opt/FileServer/.venv/bin/uvicorn app.main:app --host ${HOST} --port ${PORT}
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/fileserver
+ReadOnlyPaths=/var/lib/cctv-footage
+CapabilityBoundingSet=
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

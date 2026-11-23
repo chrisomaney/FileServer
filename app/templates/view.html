@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ name }} · {{ app_name }}{% endblock %}
+{% block body %}
+<header class="topbar">
+  <div class="brand">
+    <strong>{{ app_name }}</strong>
+    <span class="muted">{{ user }}</span>
+  </div>
+  <form method="post" action="/logout">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button type="submit" class="ghost">Sign out</button>
+  </form>
+</header>
+
+<main class="page">
+  <nav class="crumbs" aria-label="Breadcrumb">
+    {% for crumb in breadcrumbs %}
+      {% if not loop.last %}
+        <a href="{{ crumb.href }}">{{ crumb.label }}</a>
+        <span aria-hidden="true">/</span>
+      {% else %}
+        <span aria-current="page">{{ crumb.label }}</span>
+      {% endif %}
+    {% endfor %}
+  </nav>
+
+  <div class="viewer-head">
+    <div>
+      <h1>{{ name }}</h1>
+      <p class="muted">{{ size_label }} · {{ kind }}</p>
+    </div>
+    <div class="actions">
+      <a class="button ghost" href="{% if parent %}{{ '/browse/' ~ parent }}{% else %}/{% endif %}">Back</a>
+      <a class="button" href="{{ download_url }}">Download</a>
+    </div>
+  </div>
+
+  <section class="viewer">
+    {% if is_video %}
+      <video controls preload="metadata" src="{{ media_url }}"></video>
+    {% elif is_image %}
+      <img src="{{ media_url }}" alt="{{ name }}">
+    {% else %}
+      <p>Preview not available for this file type. <a href="{{ download_url }}">Download instead</a>.</p>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}
